@@ -1,0 +1,128 @@
+Bundle and Cross-Selling Recommendation System Using Product Metadata
+MineCart_DM Project Report
+
+Abstract—This report presents a bundle and cross-selling recommendation system built for Amazon product data. The approach integrates content-based similarity from product titles, category-aware bundle construction, and association-rule signals to generate coherent, diverse, and price-aware bundles. The system targets a practical gap in the literature: many recommender and bundle systems depend on user–item interactions, while metadata-only scenarios are less studied. The implementation is provided in a single notebook with reproducible analysis steps.
+
+Index Terms—recommender systems, cross-selling, bundle recommendation, association rules, word embeddings, content-based filtering.
+
+I. INTRODUCTION
+Recommender systems often rely on user behavior or transaction logs to infer preferences and co-purchase patterns. In sparse or cold-start environments, such data may be unavailable, while product metadata is still accessible. This project addresses that limitation by using product titles, categories, prices, and ratings to construct a hybrid recommendation pipeline. The goal is to support bundle construction and cross-selling without dependence on dense interaction data.
+
+II. RELATED WORK AND RESEARCH GAP
+Association Rules / Market Basket Analysis
+[1] R. Agrawal, T. Imieliński, and A. Swami, “Mining association rules between sets of items in large databases,” SIGMOD, 1993.
+Focus: discovering frequent item co-occurrences from transaction logs. Gap addressed: transaction data may be limited; this project integrates metadata-based similarity and price-aware bundling.
+
+[2] R. Agrawal and R. Srikant, “Fast algorithms for mining association rules,” VLDB, 1994.
+Focus: efficient rule mining at scale. Gap addressed: rule mining alone does not model semantic similarity or pricing constraints.
+
+Recommender Systems / Cross-Selling
+[3] B. Sarwar, G. Karypis, J. Konstan, and J. Riedl, “Item-based collaborative filtering recommendation algorithms,” WWW, 2001.
+Focus: item–item similarity from user interactions. Gap addressed: collaborative filtering depends on interaction data; this project provides a metadata-first alternative.
+
+[4] G. Linden, B. Smith, and J. York, “Amazon.com recommendations: Item-to-item collaborative filtering,” IEEE Internet Computing, 2003.
+Focus: large-scale item-to-item recommendations from purchase history. Gap addressed: sparse histories benefit from content-based similarity and category-aware bundles.
+
+Hybrid Recommenders
+[5] R. Burke, “Hybrid recommender systems: Survey and experiments,” User Modeling and User-Adapted Interaction, 2002.
+Focus: combining recommendation strategies. Gap addressed: hybrid designs commonly emphasize user–item data; this project uses product metadata and bundle constraints.
+
+Text Embeddings for Content-Based Similarity
+[6] T. Mikolov, K. Chen, G. Corrado, and J. Dean, “Efficient estimation of word representations in vector space,” arXiv:1301.3781, 2013.
+[7] T. Mikolov, I. Sutskever, K. Chen, G. Corrado, and J. Dean, “Distributed representations of words and phrases and their compositionality,” NeurIPS, 2013.
+Focus: word embeddings for semantic similarity. Gap addressed: embeddings are adapted to product-title similarity to support cross-selling without user logs.
+
+III. DATASET
+Files:
+• data/amazon_products_cleaned.csv
+• data/amazon_categories.csv
+
+Key fields used: ASIN, title, category ID/name, price, list price, star rating, review count, recent purchase activity.
+
+IV. METHODOLOGY
+A. Data Cleaning
+• Normalize titles and remove punctuation.
+• Convert numeric fields (price, stars, reviews).
+• Impute missing values and remove incomplete records.
+
+B. Exploratory Analysis
+• Category distribution.
+• Price and rating patterns.
+• Top categories and sales indicators.
+
+C. Feature Engineering
+• Discount percentage and popularity proxies.
+• Cleaned text for NLP features.
+
+D. Clustering (TF‑IDF + Numeric Features)
+• TF‑IDF vectors from product titles.
+• Optional clustering to surface natural bundle groupings.
+
+E. Content-Based Similarity (Word2Vec)
+• Load a pre-trained Word2Vec model.
+• Generate title embeddings.
+• Combine embeddings with normalized price features.
+• Compute cosine similarity for cross-selling recommendations.
+
+F. Association Rule Mining (Apriori)
+• Generate or simulate transaction baskets for co-purchase patterns.
+• Mine frequent itemsets and association rules.
+• Use lift and confidence for bundle candidate pairs.
+
+G. Category Co‑Occurrence Analysis
+• Build category-level co‑purchase matrices.
+• Identify frequently co‑occurring categories for bundle diversity.
+
+H. Bundle Generator
+Bundles are generated with constraints:
+• Anchor product similarity (content-based).
+• Category diversity to avoid redundancy.
+• Price ceiling to keep bundles marketable.
+• Minimum rating threshold for quality.
+
+I. Cross-Sell Recommender
+A hybrid scoring strategy combines:
+• Content similarity (Word2Vec).
+• Category proximity.
+• Popularity indicators.
+
+V. EVALUATION
+Bundle quality is assessed using:
+• Diversity (unique categories per bundle).
+• Coherence (average pairwise similarity).
+• Value (average rating and popularity).
+• Price efficiency (bundle price vs. sum of individual prices).
+
+VI. RESULTS AND DISCUSSION
+• The hybrid approach produces coherent yet diverse bundles.
+• Price-aware constraints prevent impractical bundles.
+• Content-based similarity yields meaningful cross-sell suggestions even without user interaction logs.
+
+VII. LIMITATIONS
+• Transaction data is approximated, which can weaken association-rule signals.
+• Model quality depends on text cleanliness and category coverage.
+• Evaluation is primarily offline and heuristic-based.
+
+VIII. FUTURE WORK
+• Incorporate real transaction or session data when available.
+• Introduce learning-to-rank for final bundle scoring.
+• Add personalization using user profiles or browsing history.
+• A/B test bundle strategies to validate business impact.
+
+IX. REPRODUCIBILITY AND USAGE
+Open the notebook:
+• notebooks/bundle_recommendation_solution.ipynb
+
+Packages:
+• pandas, numpy, matplotlib, seaborn, scikit-learn, gensim, mlxtend, nltk
+
+Outputs in the notebook are illustrative; rerun cells end-to-end to regenerate figures and metrics.
+
+REFERENCES
+[1] R. Agrawal, T. Imieliński, and A. Swami, “Mining association rules between sets of items in large databases,” SIGMOD, 1993.
+[2] R. Agrawal and R. Srikant, “Fast algorithms for mining association rules,” VLDB, 1994.
+[3] B. Sarwar, G. Karypis, J. Konstan, and J. Riedl, “Item-based collaborative filtering recommendation algorithms,” WWW, 2001.
+[4] G. Linden, B. Smith, and J. York, “Amazon.com recommendations: Item-to-item collaborative filtering,” IEEE Internet Computing, 2003.
+[5] R. Burke, “Hybrid recommender systems: Survey and experiments,” User Modeling and User-Adapted Interaction, 2002.
+[6] T. Mikolov, K. Chen, G. Corrado, and J. Dean, “Efficient estimation of word representations in vector space,” arXiv:1301.3781, 2013.
+[7] T. Mikolov, I. Sutskever, K. Chen, G. Corrado, and J. Dean, “Distributed representations of words and phrases and their compositionality,” NeurIPS, 2013.
