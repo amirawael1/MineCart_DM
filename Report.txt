@@ -1,12 +1,12 @@
 Bundle and Cross-Selling Recommendation System Using Product Metadata
 MineCart_DM Project Report
 
-Abstract—This report presents a bundle and cross-selling recommendation system built for Amazon product data. The approach integrates content-based similarity from product titles, category-aware bundle construction, and association-rule signals to generate coherent, diverse, and price-aware bundles. The system targets a practical gap in the literature: many recommender and bundle systems depend on user–item interactions, while metadata-only scenarios are less studied. The implementation is provided in a single notebook with reproducible analysis steps.
+Abstract—This report documents a bundle and cross-selling recommendation system built for Amazon product data. The pipeline integrates content-based similarity from product titles, category-aware bundle construction, and association-rule signals. The work addresses a common gap in the literature: many recommender systems and bundle mining techniques require user–item interactions, while metadata-only settings are less explored. The implementation is provided in a single notebook with reproducible analysis steps and visual diagnostics.
 
-Index Terms—recommender systems, cross-selling, bundle recommendation, association rules, word embeddings, content-based filtering.
+Index Terms—recommender systems, cross-selling, bundle recommendation, association rules, word embeddings, content-based filtering, market basket analysis.
 
 I. INTRODUCTION
-Recommender systems often rely on user behavior or transaction logs to infer preferences and co-purchase patterns. In sparse or cold-start environments, such data may be unavailable, while product metadata is still accessible. This project addresses that limitation by using product titles, categories, prices, and ratings to construct a hybrid recommendation pipeline. The goal is to support bundle construction and cross-selling without dependence on dense interaction data.
+Recommender systems are typically trained on user behavior or transaction logs. In cold-start conditions, catalogs often have rich product metadata but sparse interactions. This project therefore uses product titles, categories, prices, and ratings to construct a hybrid recommendation pipeline that supports cross-selling and bundle creation without dependence on dense user–item histories. The solution is implemented end-to-end in a notebook and includes data preparation, exploratory analysis, feature engineering, similarity modeling, association-rule mining, bundle generation, and evaluation.
 
 II. RELATED WORK AND RESEARCH GAP
 Association Rules / Market Basket Analysis
@@ -32,91 +32,166 @@ Text Embeddings for Content-Based Similarity
 [7] T. Mikolov, I. Sutskever, K. Chen, G. Corrado, and J. Dean, “Distributed representations of words and phrases and their compositionality,” NeurIPS, 2013.
 Focus: word embeddings for semantic similarity. Gap addressed: embeddings are adapted to product-title similarity to support cross-selling without user logs.
 
-III. DATASET
-Files:
-• data/amazon_products_cleaned.csv
-• data/amazon_categories.csv
+III. DATASET AND RESOURCES
+A. Data Files
+• amazon_products_cleaned.csv
+• amazon_categories.csv
 
-Key fields used: ASIN, title, category ID/name, price, list price, star rating, review count, recent purchase activity.
+B. Core Attributes
+• Product identifiers (ASIN)
+• Title (text features)
+• Category ID and category name
+• Price and list price
+• Star rating and review count
+• Monthly sales proxy (boughtInLastMonth)
+• Best-seller flag (isBestSeller)
 
-IV. METHODOLOGY
-A. Data Cleaning
-• Normalize titles and remove punctuation.
-• Convert numeric fields (price, stars, reviews).
-• Impute missing values and remove incomplete records.
+C. Software Stack
+The notebook uses pandas, numpy, matplotlib, seaborn, scikit-learn, gensim, mlxtend, nltk, and wordcloud. WordNet lemmatization and English stopwords are used for text normalization; a pre-trained Word2Vec model (Google News, 300-D) is loaded via gensim.
 
-B. Exploratory Analysis
-• Category distribution.
-• Price and rating patterns.
-• Top categories and sales indicators.
+IV. SYSTEM OVERVIEW
+The pipeline is composed of the following stages:
+1) Data loading and cleaning.
+2) Exploratory analysis and summary statistics.
+3) Feature engineering and textual preprocessing.
+4) Clustering via TF‑IDF + numeric features.
+5) Content-based similarity using Word2Vec.
+6) Association rule mining using synthetic transactions.
+7) Category co-occurrence analysis.
+8) Bundle generation with quality constraints.
+9) Cross-sell recommender with hybrid scoring.
+10) Bundle evaluation metrics.
 
-C. Feature Engineering
-• Discount percentage and popularity proxies.
-• Cleaned text for NLP features.
+V. DATA PREPARATION
+A. Loading and Merging
+The products file and categories file are loaded and merged by category_id to obtain human-readable category names. Duplicate category id columns are dropped after the merge.
 
-D. Clustering (TF‑IDF + Numeric Features)
-• TF‑IDF vectors from product titles.
-• Optional clustering to surface natural bundle groupings.
+B. Cleaning and Normalization
+1) Text normalization: titles are lowercased and stripped of punctuation; a cleaned_title column is created.
+2) Type conversion: stars, reviews, price, listPrice, and boughtInLastMonth are converted to numeric types.
+3) Missing values: stars are imputed with 0 for unrated items, price is filled with median, and missing category names are labeled “Unknown.”
+4) Discount feature: discount_pct is computed for items with valid listPrice and price.
+5) Filtering: rows missing asin, title, or category_id are removed.
 
-E. Content-Based Similarity (Word2Vec)
-• Load a pre-trained Word2Vec model.
-• Generate title embeddings.
-• Combine embeddings with normalized price features.
-• Compute cosine similarity for cross-selling recommendations.
+VI. EXPLORATORY DATA ANALYSIS
+A. Category Distribution
+The top 20 categories are visualized using a horizontal bar plot, providing a view of catalog concentration and diversity.
 
-F. Association Rule Mining (Apriori)
-• Generate or simulate transaction baskets for co-purchase patterns.
-• Mine frequent itemsets and association rules.
-• Use lift and confidence for bundle candidate pairs.
+B. Star Rating Distribution
+Ratings are filtered to stars > 0 and plotted as a histogram with KDE; mean and median ratings are reported.
 
-G. Category Co‑Occurrence Analysis
-• Build category-level co‑purchase matrices.
-• Identify frequently co‑occurring categories for bundle diversity.
+C. Price Distribution by Category
+Boxplots show price distributions for the top 10 categories; extreme values are capped at the 95th percentile for readability.
 
-H. Bundle Generator
-Bundles are generated with constraints:
-• Anchor product similarity (content-based).
-• Category diversity to avoid redundancy.
-• Price ceiling to keep bundles marketable.
-• Minimum rating threshold for quality.
+D. Best-Seller Analysis
+Best-seller items are filtered and grouped by category to identify which categories dominate best-seller counts.
 
-I. Cross-Sell Recommender
-A hybrid scoring strategy combines:
-• Content similarity (Word2Vec).
-• Category proximity.
-• Popularity indicators.
+E. Top Products by Sales Volume
+Items are ranked by boughtInLastMonth to highlight the top 20 by recent sales activity.
 
-V. EVALUATION
-Bundle quality is assessed using:
-• Diversity (unique categories per bundle).
-• Coherence (average pairwise similarity).
-• Value (average rating and popularity).
-• Price efficiency (bundle price vs. sum of individual prices).
+F. Price vs. Rating Relationship
+A scatter plot compares price and star ratings for a large sample; correlation is computed to assess linear association between price and ratings.
 
-VI. RESULTS AND DISCUSSION
-• The hybrid approach produces coherent yet diverse bundles.
-• Price-aware constraints prevent impractical bundles.
-• Content-based similarity yields meaningful cross-sell suggestions even without user interaction logs.
+VII. FEATURE ENGINEERING
+A. Price Buckets
+Products are segmented into price ranges using predefined bins (<$10, $10–25, $25–50, $50–100, $100–250, >$250). This supports segmented analysis and bundle strategy decisions.
 
-VII. LIMITATIONS
-• Transaction data is approximated, which can weaken association-rule signals.
-• Model quality depends on text cleanliness and category coverage.
-• Evaluation is primarily offline and heuristic-based.
+B. Popularity Score
+Two normalized signals—reviews and boughtInLastMonth—are scaled and combined to form a popularity_score. This score is later used in hybrid recommendation scoring and evaluation.
 
-VIII. FUTURE WORK
+C. Rating Quality and Value Scores
+rating_quality scales stars by log(review count) to favor well-supported ratings. value_score compares star rating to log(price) to approximate “value for money.”
+
+D. Category-Level Statistics
+Category average price, average rating, and total sales are computed and merged into the main dataframe. A price_vs_category feature expresses how expensive a product is relative to its category average.
+
+E. Summary Statistics
+The notebook prints dataset-level summaries: total products, unique categories, number of best sellers, price statistics, rating statistics, and sales totals.
+
+F. WordCloud of Product Titles
+Tokenized title terms are filtered with stopwords and domain-specific stopwords. A WordCloud and top-term table are produced to identify dominant vocabulary in the catalog.
+
+VIII. CLUSTERING FOR PRODUCT GROUPING
+A. Text Preprocessing
+Titles are lowercased, stripped of punctuation and digits, tokenized, lemmatized, and stopwords are removed to produce processed_title.
+
+B. Feature Construction
+TF‑IDF is computed over processed titles (max_features=500). Numeric features (price, stars, popularity_score) are scaled and concatenated with TF‑IDF vectors to form combined_features.
+
+C. Model Selection and Clustering
+K‑Means is evaluated for k=3 to 11 using silhouette score. The best k is selected, and a final K‑Means model is fitted.
+
+D. Visualization and Cluster Summary
+PCA reduces features to two dimensions for visualization. Cluster-level summaries report mean price, stars, popularity, and product counts; top categories per cluster provide semantic interpretation.
+
+IX. CONTENT-BASED SIMILARITY WITH WORD2VEC
+A. Tokenization and Vectorization
+Titles are tokenized, lemmatized, and filtered. Each product receives an averaged Word2Vec vector over valid tokens. Items with fewer than three valid tokens are removed to maintain vector reliability.
+
+B. Feature Fusion
+Price is normalized via MinMaxScaler and concatenated with the Word2Vec vector to create combined_vectors. This couples semantic similarity with price proximity.
+
+C. Similarity Retrieval
+Cosine similarity is computed between a target product and the full catalog to retrieve top-N similar items. The notebook demonstrates a sample recommendation with product title, category, price, and similarity score.
+
+X. ASSOCIATION RULE MINING FOR BUNDLE SIGNALS
+A. Synthetic Transaction Generation
+Because explicit transactions are unavailable, synthetic baskets are generated by sampling products from randomly selected categories. Each basket includes 2–4 categories and 1–3 items per category, producing a realistic co-occurrence structure.
+
+B. One‑Hot Encoding
+Transactions are converted to a binary matrix using TransactionEncoder to support Apriori mining.
+
+C. Apriori and Rule Mining
+Frequent itemsets are discovered with minimum support, and association rules are generated using lift as the primary metric. Top rules are displayed with support, confidence, and lift.
+
+XI. CATEGORY CO‑OCCURRENCE ANALYSIS
+A. Category-Level Transactions
+Product-level transactions are transformed into category-level baskets to capture cross-category co-purchase patterns.
+
+B. Co‑Occurrence Matrix and Heatmap
+Category pairs are counted and displayed in a ranked table. A heatmap visualizes co-occurrence among the top categories, identifying strong category affinities for bundle diversity.
+
+XII. BUNDLE GENERATOR
+A. Bundle Construction Logic
+Given an anchor product index, candidates are filtered by minimum rating, category diversity (different from anchor), and optional price ceiling. Candidates are ranked by content similarity.
+
+B. Output
+Bundles include the anchor product and top-ranked diverse items. The notebook demonstrates multiple bundles with total bundle price and component products.
+
+XIII. CROSS-SELL RECOMMENDER
+A. Hybrid Scoring Model
+The CrossSellRecommender combines: (1) content similarity from combined_vectors, (2) category similarity, and (3) normalized popularity_score. Weights are configurable via content_weight, category_weight, and popularity_weight.
+
+B. Recommendation Output
+For a random product, the recommender returns top-N items with final scores, demonstrating cross-selling recommendations that incorporate both semantic relevance and business signals.
+
+XIV. BUNDLE EVALUATION
+A. Metrics
+Bundle quality is evaluated via:
+• Diversity: unique categories / bundle size.
+• Coherence: average pairwise cosine similarity.
+• Value: average rating and popularity.
+• Price efficiency: total price relative to individual prices.
+
+B. Aggregated Results
+Multiple bundles are generated and evaluated; metrics are averaged to summarize system performance. Results are printed along with detailed bundle-level metrics.
+
+XV. RESULTS AND DISCUSSION
+The system produces coherent yet diverse bundles by balancing semantic similarity with category diversity. Price constraints prevent unrealistic bundles, and popularity-aware cross-sell scoring highlights items with stronger business relevance. Even without true transaction logs, the synthetic basket strategy yields interpretable association rules that complement content similarity.
+
+XVI. LIMITATIONS
+• Synthetic transactions may not perfectly reflect real purchase behavior.
+• Word2Vec embeddings depend on title quality and vocabulary coverage.
+• Evaluation is offline and heuristic; no online or A/B testing is performed.
+
+XVII. FUTURE WORK
 • Incorporate real transaction or session data when available.
-• Introduce learning-to-rank for final bundle scoring.
-• Add personalization using user profiles or browsing history.
-• A/B test bundle strategies to validate business impact.
+• Introduce learning-to-rank or supervised bundling objectives.
+• Add user personalization for ranked cross-sell recommendations.
+• Evaluate with online experiments or business KPIs.
 
-IX. REPRODUCIBILITY AND USAGE
-Open the notebook:
-• notebooks/bundle_recommendation_solution.ipynb
-
-Packages:
-• pandas, numpy, matplotlib, seaborn, scikit-learn, gensim, mlxtend, nltk
-
-Outputs in the notebook are illustrative; rerun cells end-to-end to regenerate figures and metrics.
+XVIII. REPRODUCIBILITY AND USAGE
+The notebook bundle_recommendation_solution.ipynb contains all steps, visualizations, and outputs. Re-run cells end-to-end to reproduce figures and metrics. Required packages: pandas, numpy, matplotlib, seaborn, scikit-learn, gensim, mlxtend, nltk, wordcloud.
 
 REFERENCES
 [1] R. Agrawal, T. Imieliński, and A. Swami, “Mining association rules between sets of items in large databases,” SIGMOD, 1993.

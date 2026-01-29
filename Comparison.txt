@@ -1,0 +1,69 @@
+Comparison Document: This Work vs. Prior Research
+
+Abstract—This document compares the MineCart_DM bundle and cross-selling system with foundational research in association rules, recommender systems, hybrid recommenders, and word embeddings. It highlights the main differences and the key contributions of our work.
+
+I. SCOPE OF COMPARISON
+The comparison focuses on papers cited in the project report:
+[1] Agrawal et al., 1993 (SIGMOD)
+[2] Agrawal and Srikant, 1994 (VLDB)
+[3] Sarwar et al., 2001 (WWW)
+[4] Linden et al., 2003 (IEEE Internet Computing)
+[5] Burke, 2002 (UMUAI)
+[6] Mikolov et al., 2013 (arXiv)
+[7] Mikolov et al., 2013 (NeurIPS)
+
+II. KEY POINTS OF OUR WORK
+1) Metadata-first recommendation: Works without user–item logs by using titles, categories, prices, ratings, and sales proxies.
+2) Hybrid design tailored for bundling: Combines content similarity, category diversity, popularity, and price constraints.
+3) Bundle generator with practical constraints: Enforces minimum rating, category diversity, and price ceilings.
+4) Association-rule signals without transactions: Uses synthetic baskets to approximate co-purchase patterns.
+5) Multi-level evaluation: Measures diversity, coherence, value, and price efficiency for bundles.
+
+III. COMPARISON TABLE (SUMMARY)
+Area | Prior Research Focus | Gap in Prior Work | Our Work
+-----|----------------------|------------------|---------
+Association rules | Co-occurrence from transaction logs | Requires transactions; no semantic similarity or price constraints | Synthetic transactions + semantic similarity + price-aware bundling
+Collaborative filtering | User–item interaction similarity | Cold-start and sparse data limitations | Metadata-only similarity from titles and product attributes
+Hybrid recommenders | Combining multiple signals, often with user data | Less emphasis on metadata-only pipelines | Hybrid scoring with content, category, and popularity for cross-sell
+Word embeddings | General semantic similarity for text | Not applied to price/category constraints in bundling | Word2Vec title vectors fused with price for product similarity
+
+IV. PAPER-BY-PAPER DIFFERENCES
+A. Association Rule Mining
+[1] and [2] focus on efficient discovery of frequent itemsets and rules from large transaction databases. They do not address semantic similarity between items or pricing constraints.
+Our work integrates rule mining signals with content-based similarity and price-aware bundle selection, and introduces synthetic transactions when logs are unavailable.
+
+B. Collaborative Filtering and Item-to-Item Recommendations
+[3] and [4] use user–item interactions to compute item similarities. Their core assumption is access to large-scale behavioral data.
+Our work does not require interaction data. It computes similarity from product titles (Word2Vec) and augments it with category and popularity features, enabling cross-sell recommendations in metadata-only settings.
+
+C. Hybrid Recommenders
+[5] surveys methods that combine multiple recommenders (content, collaborative, knowledge-based). Many examples still depend on user ratings or logs.
+Our work builds a hybrid framework without user histories, emphasizing practical bundle constraints (price ceiling, category diversity, minimum rating) that are not central in the survey.
+
+D. Word Embeddings for Text Similarity
+[6] and [7] introduce Word2Vec for semantic representations of words and phrases. They do not address recommender objectives or bundling constraints.
+Our work applies Word2Vec to product titles, then fuses the embeddings with normalized price to guide product similarity and bundling decisions.
+
+V. CONTRIBUTIONS RELATIVE TO PRIOR WORK
+1) Practical bundling constraints: Price ceilings and category diversity are explicitly enforced.
+2) Metadata-only pipeline: Operates without user or transaction data.
+3) Hybrid scoring tailored to cross-selling: Combines semantic similarity, category overlap, and popularity signals.
+4) Bundle evaluation framework: Uses diversity and coherence metrics to assess bundle quality.
+5) End-to-end reproducible implementation: Data preparation, modeling, visualization, and evaluation are contained in one notebook.
+
+VI. LIMITATIONS OF OUR APPROACH (IN CONTEXT)
+1) Synthetic transactions approximate real co-purchase behavior and may reduce rule quality.
+2) Word2Vec embeddings depend on title quality and vocabulary coverage.
+3) Evaluation is offline and heuristic-based; online testing is not performed.
+
+VII. CONCLUSION
+Compared to prior work, this project emphasizes a metadata-first, constraint-aware, and hybrid approach to bundling and cross-selling. It extends classic association-rule and collaborative-filtering concepts to settings where user logs are sparse or unavailable, while incorporating product semantics, category diversity, and price optimization for practical recommendation outputs.
+
+REFERENCES
+[1] R. Agrawal, T. Imieliński, and A. Swami, “Mining association rules between sets of items in large databases,” SIGMOD, 1993.
+[2] R. Agrawal and R. Srikant, “Fast algorithms for mining association rules,” VLDB, 1994.
+[3] B. Sarwar, G. Karypis, J. Konstan, and J. Riedl, “Item-based collaborative filtering recommendation algorithms,” WWW, 2001.
+[4] G. Linden, B. Smith, and J. York, “Amazon.com recommendations: Item-to-item collaborative filtering,” IEEE Internet Computing, 2003.
+[5] R. Burke, “Hybrid recommender systems: Survey and experiments,” User Modeling and User-Adapted Interaction, 2002.
+[6] T. Mikolov, K. Chen, G. Corrado, and J. Dean, “Efficient estimation of word representations in vector space,” arXiv:1301.3781, 2013.
+[7] T. Mikolov, I. Sutskever, K. Chen, G. Corrado, and J. Dean, “Distributed representations of words and phrases and their compositionality,” NeurIPS, 2013.
